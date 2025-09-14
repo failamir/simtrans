@@ -47,7 +47,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
                 <Building2 className="w-8 h-8 text-white" />
               </div>
             </div>
-            <h2 className="text-3xl font-bold text-gray-900">Sistem Kependudukan</h2>
+            <h2 className="text-3xl font-bold text-gray-900">SIMTRANS</h2>
             <p className="text-gray-600 mt-2">Masuk ke akun Anda</p>
           </div>
 
