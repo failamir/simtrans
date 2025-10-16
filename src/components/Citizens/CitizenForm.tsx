@@ -209,9 +209,9 @@ export const CitizenForm: React.FC<CitizenFormProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-blue-700">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col">
+        {/* Header - Fixed */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-xl flex-shrink-0">
           <div className="flex items-center space-x-3">
             <Users className="w-6 h-6 text-white" />
             <h2 className="text-xl font-bold text-white">
@@ -226,7 +226,8 @@ export const CitizenForm: React.FC<CitizenFormProps> = ({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col h-full">
+        {/* Form Content - Scrollable */}
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto p-6">
             {/* Family Address Section */}
             <div className="mb-8">
@@ -288,7 +289,7 @@ export const CitizenForm: React.FC<CitizenFormProps> = ({
                     type="text"
                     value={familyData.province}
                     onChange={(e) => updateFamilyData('province', e.target.value)}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-colors ${
                       errors.province ? 'border-red-300' : 'border-gray-300'
                     }`}
                     placeholder="Masukkan provinsi"
@@ -555,8 +556,8 @@ export const CitizenForm: React.FC<CitizenFormProps> = ({
             </div>
           </div>
 
-          {/* Footer */}
-          <div className="border-t border-gray-200 p-6 bg-gray-50">
+          {/* Footer - Fixed */}
+          <div className="border-t border-gray-200 p-6 bg-gray-50 rounded-b-xl flex-shrink-0">
             <div className="flex items-center justify-end space-x-4">
               <button
                 type="button"

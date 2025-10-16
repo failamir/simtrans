@@ -3,6 +3,7 @@ import { Layout } from '../components/Layout/Layout';
 import { StatsCard } from '../components/Dashboard/StatsCard';
 import { QuickActions } from '../components/Dashboard/QuickActions';
 import { CitizenForm } from '../components/Citizens/CitizenForm';
+import { VirtualIDCard } from '../components/Citizens/VirtualIDCard';
 import { Users, UserPlus, Activity, Building } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Citizen } from '../types';
@@ -10,6 +11,22 @@ import { Citizen } from '../types';
 export const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const [showForm, setShowForm] = useState(false);
+  const [showIDCard, setShowIDCard] = useState(false);
+  const [selectedCitizen, setSelectedCitizen] = useState<Citizen | undefined>();
+
+  // Listen for virtual ID card events from QuickActions
+  React.useEffect(() => {
+    const handleShowVirtualIDCard = (event: CustomEvent) => {
+      setSelectedCitizen(event.detail);
+      setShowIDCard(true);
+    };
+
+    window.addEventListener('showVirtualIDCard', handleShowVirtualIDCard as EventListener);
+    
+    return () => {
+      window.removeEventListener('showVirtualIDCard', handleShowVirtualIDCard as EventListener);
+    };
+  }, []);
 
   // Mock data - in real app, fetch from API
   const stats = {
@@ -161,6 +178,18 @@ export const Dashboard: React.FC = () => {
         onClose={() => setShowForm(false)}
         onSubmit={handleAddCitizens}
       />
+
+      {/* Virtual ID Card Modal */}
+      {selectedCitizen && (
+        <VirtualIDCard
+          citizen={selectedCitizen}
+          isOpen={showIDCard}
+          onClose={() => {
+            setShowIDCard(false);
+            setSelectedCitizen(undefined);
+          }}
+        />
+      )}
     </Layout>
   );
 };

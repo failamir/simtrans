@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Layout } from '../components/Layout/Layout';
 import { CitizenForm } from '../components/Citizens/CitizenForm';
-import { Plus, Search, Filter, Edit, Trash2, Eye, Users, Download } from 'lucide-react';
+import { VirtualIDCard } from '../components/Citizens/VirtualIDCard';
+import { Plus, Search, Filter, CreditCard as Edit, Trash2, Eye, Users, Download } from 'lucide-react';
 import { Citizen } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -11,6 +12,8 @@ export const Citizens: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingCitizen, setEditingCitizen] = useState<Citizen | undefined>();
+  const [showIDCard, setShowIDCard] = useState(false);
+  const [selectedCitizen, setSelectedCitizen] = useState<Citizen | undefined>();
 
   // Mock data - in real app, fetch from API
   const [citizens, setCitizens] = useState<Citizen[]>([
@@ -97,8 +100,8 @@ export const Citizens: React.FC = () => {
   };
 
   const handleView = (citizen: Citizen) => {
-    console.log('View citizen:', citizen);
-    // Implement view modal or navigate to detail page
+    setSelectedCitizen(citizen);
+    setShowIDCard(true);
   };
 
   const handleExport = () => {
@@ -328,6 +331,7 @@ export const Citizens: React.FC = () => {
                         <button
                           onClick={() => handleView(citizen)}
                           className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
+                          title="Lihat KTP"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
@@ -386,6 +390,18 @@ export const Citizens: React.FC = () => {
         onSubmit={handleAddCitizens}
         editingCitizen={editingCitizen}
       />
+
+      {/* Virtual ID Card Modal */}
+      {selectedCitizen && (
+        <VirtualIDCard
+          citizen={selectedCitizen}
+          isOpen={showIDCard}
+          onClose={() => {
+            setShowIDCard(false);
+            setSelectedCitizen(undefined);
+          }}
+        />
+      )}
     </Layout>
   );
 };

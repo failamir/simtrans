@@ -6,6 +6,8 @@ import { RegisterForm } from './components/Auth/RegisterForm';
 import { Dashboard } from './pages/Dashboard';
 import { Citizens } from './pages/Citizens';
 import { Users } from './pages/Users';
+import { Areas } from './pages/Areas';
+import { DistributionMap } from './pages/DistributionMap';
 
 const AuthPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -48,6 +50,22 @@ const AppRoutes: React.FC = () => {
         element={
           user.role === 'admin' ? 
           <Users /> : 
+          <Navigate to="/" replace />
+        } 
+      />
+      <Route 
+        path="/areas" 
+        element={
+          user.role === 'admin' || user.role === 'staff' ? 
+          <Areas /> : 
+          <Navigate to="/" replace />
+        } 
+      />
+      <Route 
+        path="/distribution-map" 
+        element={
+          user.role === 'admin' || user.role === 'staff' ? 
+          <DistributionMap /> : 
           <Navigate to="/" replace />
         } 
       />

@@ -41,6 +41,31 @@ export interface Citizen {
   createdBy: string;
 }
 
+export interface Area {
+  id: string;
+  code: string;
+  name: string;
+  type: 'province' | 'city' | 'district' | 'village';
+  parentId?: string;
+  level: number;
+  isActive: boolean;
+  population?: number;
+  area?: number; // in km²
+  postalCode?: string;
+  coordinates?: {
+    latitude: number;
+    longitude: number;
+  };
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+}
+
+export interface AreaHierarchy extends Area {
+  children?: AreaHierarchy[];
+  parent?: Area;
+}
+
 export interface DashboardStats {
   totalCitizens: number;
   newRegistrations: number;

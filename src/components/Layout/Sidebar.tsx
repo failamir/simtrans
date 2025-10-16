@@ -9,7 +9,9 @@ import {
   Settings,
   Building2,
   Menu,
-  X
+  X,
+  MapPin,
+  Map
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -25,6 +27,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
   const navigation = [
     { name: 'Dashboard', href: '/', icon: Home, roles: ['admin', 'staff', 'user'] },
     { name: 'Data Penduduk', href: '/citizens', icon: Users, roles: ['admin', 'staff'] },
+    { name: 'Manajemen Kawasan', href: '/areas', icon: MapPin, roles: ['admin', 'staff'] },
+    { name: 'Peta Penyebaran', href: '/distribution-map', icon: Map, roles: ['admin', 'staff'] },
     { name: 'Manajemen User', href: '/users', icon: UserCheck, roles: ['admin'] },
     { name: 'Laporan', href: '/reports', icon: FileText, roles: ['admin', 'staff'] },
     { name: 'Statistik', href: '/statistics', icon: BarChart3, roles: ['admin', 'staff'] },
@@ -55,7 +59,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
           <div className="flex items-center justify-between p-6 border-b border-gray-200">
             <div className="flex items-center space-x-2">
               <Building2 className="w-8 h-8 text-blue-600" />
-              <h2 className="text-xl font-bold text-gray-900">SisPenduk</h2>
+              <h2 className="text-xl font-bold text-gray-900">SIMTRANS</h2>
             </div>
             <button
               onClick={onToggle}

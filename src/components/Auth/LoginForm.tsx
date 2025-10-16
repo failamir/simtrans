@@ -48,7 +48,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
               </div>
             </div>
             <h2 className="text-3xl font-bold text-gray-900">SIMTRANS</h2>
-            <p className="text-gray-600 mt-2">Masuk ke akun Anda</p>
+            <p className="text-gray-600 mt-2">Sistem Monitoring Penyebaran Kependudukan Transmigrasi</p>
           </div>
 
           {/* Demo credentials */}
