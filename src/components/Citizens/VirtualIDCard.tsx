@@ -1,5 +1,5 @@
-import React from 'react';
-import { X, Download, Share2, CreditCard, MapPin, Calendar, User, Phone, Mail, FileImage, FileText } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Share2, CreditCard, MapPin, User, FileImage, FileText, QrCode } from 'lucide-react';
 import { Citizen } from '../../types';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -11,20 +11,9 @@ interface VirtualIDCardProps {
 }
 
 export const VirtualIDCard: React.FC<VirtualIDCardProps> = ({ citizen, isOpen, onClose }) => {
+  const [showBack, setShowBack] = useState(false);
+  
   if (!isOpen) return null;
-
-  const calculateAge = (birthDate: string): number => {
-    const today = new Date();
-    const birth = new Date(birthDate);
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--;
-    }
-    
-    return age;
-  };
 
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString('id-ID', {
@@ -32,20 +21,6 @@ export const VirtualIDCard: React.FC<VirtualIDCardProps> = ({ citizen, isOpen, o
       month: '2-digit',
       year: 'numeric'
     });
-  };
-
-  const getGenderText = (gender: string): string => {
-    return gender === 'male' ? 'LAKI-LAKI' : 'PEREMPUAN';
-  };
-
-  const getMaritalStatusText = (status: string): string => {
-    switch (status) {
-      case 'single': return 'BELUM KAWIN';
-      case 'married': return 'KAWIN';
-      case 'divorced': return 'CERAI HIDUP';
-      case 'widowed': return 'CERAI MATI';
-      default: return status.toUpperCase();
-    }
   };
 
   const handleDownloadImage = async () => {
@@ -111,85 +86,6 @@ export const VirtualIDCard: React.FC<VirtualIDCardProps> = ({ citizen, isOpen, o
     }
   };
 
-  const handleDownloadCanvas = () => {
-    // Create a canvas to generate the ID card as an image
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    if (!ctx) return;
-
-    // Set canvas size (ID card dimensions)
-    canvas.width = 800;
-    canvas.height = 500;
-
-    // Background gradient
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, '#1e40af');
-    gradient.addColorStop(1, '#3b82f6');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Header
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 24px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('REPUBLIK INDONESIA', canvas.width / 2, 40);
-    
-    ctx.font = 'bold 20px Arial';
-    ctx.fillText('KARTU TANDA PENDUDUK ELEKTRONIK', canvas.width / 2, 70);
-
-    // Card content background
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillRect(40, 100, canvas.width - 80, canvas.height - 140);
-
-    // Content
-    ctx.fillStyle = '#1f2937';
-    ctx.font = '16px Arial';
-    ctx.textAlign = 'left';
-
-    const leftColumn = 60;
-    const rightColumn = 420;
-    let yPos = 140;
-    const lineHeight = 30;
-
-    // Left column
-    ctx.fillText(`NIK: ${citizen.nik}`, leftColumn, yPos);
-    yPos += lineHeight;
-    ctx.fillText(`Nama: ${citizen.name}`, leftColumn, yPos);
-    yPos += lineHeight;
-    ctx.fillText(`Tempat/Tgl Lahir: ${citizen.birthPlace}, ${formatDate(citizen.birthDate)}`, leftColumn, yPos);
-    yPos += lineHeight;
-    ctx.fillText(`Jenis Kelamin: ${getGenderText(citizen.gender)}`, leftColumn, yPos);
-    yPos += lineHeight;
-    ctx.fillText(`Alamat: ${citizen.address}`, leftColumn, yPos);
-    yPos += lineHeight;
-    ctx.fillText(`RT/RW: -/-`, leftColumn, yPos);
-    yPos += lineHeight;
-    ctx.fillText(`Kel/Desa: ${citizen.district}`, leftColumn, yPos);
-
-    // Right column
-    yPos = 140;
-    ctx.fillText(`Agama: ${citizen.religion}`, rightColumn, yPos);
-    yPos += lineHeight;
-    ctx.fillText(`Status Perkawinan: ${getMaritalStatusText(citizen.maritalStatus)}`, rightColumn, yPos);
-    yPos += lineHeight;
-    ctx.fillText(`Pekerjaan: ${citizen.occupation}`, rightColumn, yPos);
-    yPos += lineHeight;
-    ctx.fillText(`Kewarganegaraan: WNI`, rightColumn, yPos);
-    yPos += lineHeight;
-    ctx.fillText(`Berlaku Hingga: SEUMUR HIDUP`, rightColumn, yPos);
-
-    // Footer
-    ctx.fillText(`${citizen.city}`, rightColumn, canvas.height - 80);
-    ctx.fillText(`${formatDate(citizen.createdAt)}`, rightColumn, canvas.height - 50);
-
-    // Download the image
-    const link = document.createElement('a');
-    link.download = `KTP_${citizen.name.replace(/\s+/g, '_')}.png`;
-    link.href = canvas.toDataURL();
-    link.click();
-  };
-
   const handleShare = async () => {
     if (navigator.share) {
       try {
@@ -223,7 +119,7 @@ Alamat: ${citizen.address}, ${citizen.district}, ${citizen.city}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center space-x-3">
             <CreditCard className="w-6 h-6 text-blue-600" />
-            <h2 className="text-xl font-bold text-gray-900">Kartu Tanda Penduduk Elektronik</h2>
+            <h2 className="text-xl font-bold text-gray-900">Kartu Identitas Transmigrasi</h2>
           </div>
           <button
             onClick={onClose}
@@ -235,122 +131,124 @@ Alamat: ${citizen.address}, ${citizen.district}, ${citizen.city}
 
         {/* ID Card */}
         <div className="p-6">
+          {/* Toggle Button */}
+          <div className="flex justify-center mb-4">
+            <button
+              onClick={() => setShowBack(!showBack)}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              {showBack ? 'Lihat Sisi Depan' : 'Lihat Sisi Belakang'}
+            </button>
+          </div>
+
           <div 
             id="virtual-id-card"
-            className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg p-6 text-white shadow-lg"
+            className="relative w-full max-w-2xl mx-auto rounded-2xl shadow-2xl overflow-hidden"
+            style={{ aspectRatio: '1.6/1' }}
           >
-            {/* Card Header */}
-            <div className="text-center mb-6">
-              <div className="flex items-center justify-center mb-2">
-                <img 
-                  src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Coat_of_arms_of_Indonesia_Garuda_Pancasila.svg/100px-Coat_of_arms_of_Indonesia_Garuda_Pancasila.svg.png" 
-                  alt="Garuda Pancasila" 
-                  className="w-12 h-12 mr-4"
-                />
-                <div>
-                  <h3 className="text-lg font-bold">REPUBLIK INDONESIA</h3>
-                  <p className="text-sm opacity-90">KARTU TANDA PENDUDUK ELEKTRONIK</p>
+            {/* Front Side */}
+            <div 
+              className={`absolute inset-0 transition-all duration-500 ${
+                showBack ? 'opacity-0 pointer-events-none' : 'opacity-100'
+              }`}
+              style={{
+                background: 'linear-gradient(135deg, #1e3a5f 0%, #2d5a7b 100%)'
+              }}
+            >
+              {/* Header */}
+              <div className="bg-[#1e3a5f] text-white text-center py-3 px-6">
+                <h3 className="text-xs sm:text-sm md:text-base font-bold tracking-wide">DINAS TENAGA KERJA DAN TRANSMIGRASI</h3>
+              </div>
+
+              {/* Main Content */}
+              <div className="flex items-center justify-center h-[calc(100%-6rem)] p-4 sm:p-6 md:p-8">
+                <div className="bg-white rounded-lg p-4 sm:p-6 md:p-8 w-full max-w-md shadow-lg">
+                  {/* Logo */}
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="relative">
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-4 border-blue-600 flex items-center justify-center bg-white shadow-lg">
+                        <div className="text-center">
+                          <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 mx-auto bg-gradient-to-br from-blue-500 via-blue-600 to-green-500 rounded-full flex items-center justify-center">
+                            <User className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-white" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* SIMTRANS Text */}
+                  <div className="text-center">
+                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2">SIMTRANS</h2>
+                    <p className="text-[10px] sm:text-xs md:text-sm text-gray-600 leading-tight px-2">
+                      SISTEM INFORMASI MANAJEMEN<br />TRANSMIGRASI
+                    </p>
+                  </div>
                 </div>
+              </div>
+
+              {/* Footer */}
+              <div className="bg-[#1e3a5f] text-white text-center py-3 px-6">
+                <h3 className="text-xs sm:text-sm md:text-base font-bold tracking-wide">PEMERINTAH PROVINSI SULAWESI TENGAH</h3>
               </div>
             </div>
 
-            {/* Card Content */}
-            <div className="bg-white bg-opacity-95 rounded-lg p-6 text-gray-900">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Photo Placeholder */}
-                <div className="flex justify-center md:justify-start">
-                  <div className="w-32 h-40 bg-gray-200 rounded-lg flex items-center justify-center border-2 border-gray-300">
-                    <User className="w-16 h-16 text-gray-400" />
-                  </div>
-                </div>
-
-                {/* Personal Information */}
-                <div className="md:col-span-2 space-y-3">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-xs font-medium text-gray-600 uppercase">NIK</p>
-                      <p className="text-lg font-bold text-gray-900">{citizen.nik}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-gray-600 uppercase">Nama</p>
-                      <p className="text-lg font-bold text-gray-900">{citizen.name}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-gray-600 uppercase">Tempat/Tgl Lahir</p>
-                      <p className="text-sm text-gray-900">{citizen.birthPlace}, {formatDate(citizen.birthDate)}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-gray-600 uppercase">Jenis Kelamin</p>
-                      <p className="text-sm text-gray-900">{getGenderText(citizen.gender)}</p>
-                    </div>
-                    <div className="md:col-span-2">
-                      <p className="text-xs font-medium text-gray-600 uppercase">Alamat</p>
-                      <p className="text-sm text-gray-900">{citizen.address}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-gray-600 uppercase">RT/RW</p>
-                      <p className="text-sm text-gray-900">-/-</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-gray-600 uppercase">Kel/Desa</p>
-                      <p className="text-sm text-gray-900">{citizen.district}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-gray-600 uppercase">Kecamatan</p>
-                      <p className="text-sm text-gray-900">{citizen.district}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-gray-600 uppercase">Kabupaten/Kota</p>
-                      <p className="text-sm text-gray-900">{citizen.city}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-gray-600 uppercase">Provinsi</p>
-                      <p className="text-sm text-gray-900">{citizen.province}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-gray-600 uppercase">Agama</p>
-                      <p className="text-sm text-gray-900">{citizen.religion}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-gray-600 uppercase">Status Perkawinan</p>
-                      <p className="text-sm text-gray-900">{getMaritalStatusText(citizen.maritalStatus)}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-gray-600 uppercase">Pekerjaan</p>
-                      <p className="text-sm text-gray-900">{citizen.occupation}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-gray-600 uppercase">Kewarganegaraan</p>
-                      <p className="text-sm text-gray-900">WNI</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-gray-600 uppercase">Berlaku Hingga</p>
-                      <p className="text-sm font-bold text-gray-900">SEUMUR HIDUP</p>
-                    </div>
+            {/* Back Side */}
+            <div 
+              className={`absolute inset-0 transition-all duration-500 ${
+                showBack ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              }`}
+              style={{
+                background: 'linear-gradient(135deg, #1e3a5f 0%, #2d5a7b 100%)'
+              }}
+            >
+              {/* Header */}
+              <div className="text-white text-center py-4 px-6">
+                <h3 className="text-sm sm:text-base md:text-lg font-bold tracking-wide mb-1">KARTU IDENTITAS TRANSMIGRASI</h3>
+                <div className="flex items-center justify-center">
+                  <div className="border-b-2 border-yellow-400 pb-1">
+                    <p className="text-yellow-400 text-xs sm:text-sm md:text-base font-bold">UPT. TORIRE</p>
                   </div>
                 </div>
               </div>
 
-              {/* Card Footer */}
-              <div className="mt-6 pt-4 border-t border-gray-200 flex justify-between items-center">
-                <div className="text-right">
-                  <p className="text-xs text-gray-600">{citizen.city}</p>
-                  <p className="text-xs text-gray-600">{formatDate(citizen.createdAt)}</p>
+              {/* Main Content */}
+              <div className="px-4 sm:px-6 md:px-8 py-4 sm:py-6">
+                <div className="grid grid-cols-3 gap-4">
+                  {/* Left Side - Information */}
+                  <div className="col-span-2 text-white space-y-3 sm:space-y-4">
+                    <div>
+                      <p className="text-[10px] sm:text-xs font-medium opacity-90">• NAMA LENGKAP</p>
+                      <p className="text-sm sm:text-base md:text-lg font-bold text-yellow-400 ml-3">{citizen.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] sm:text-xs font-medium opacity-90">• NOMOR (NIK)</p>
+                      <p className="text-sm sm:text-base md:text-lg font-bold text-yellow-400 ml-3">{citizen.nik}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] sm:text-xs font-medium opacity-90">• ASAL DAERAH</p>
+                      <p className="text-sm sm:text-base md:text-lg font-bold text-yellow-400 ml-3">{citizen.birthPlace} - {citizen.province}</p>
+                    </div>
+                  </div>
+
+                  {/* Right Side - QR Code */}
+                  <div className="flex flex-col items-center justify-start">
+                    <div className="bg-white p-2 sm:p-3 rounded-lg shadow-lg">
+                      <QrCode className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 text-gray-800" />
+                    </div>
+                    <div className="mt-2 text-center">
+                      <p className="text-[8px] sm:text-[9px] text-white font-medium">Catatan:</p>
+                      <p className="text-[7px] sm:text-[8px] text-white opacity-80 leading-tight">Scan untuk melihat data</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-xs text-gray-500">
-                  <p>Umur: {calculateAge(citizen.birthDate)} tahun</p>
-                  {citizen.phone && (
-                    <p className="flex items-center mt-1">
-                      <Phone className="w-3 h-3 mr-1" />
-                      {citizen.phone}
-                    </p>
-                  )}
-                  {citizen.email && (
-                    <p className="flex items-center mt-1">
-                      <Mail className="w-3 h-3 mr-1" />
-                      {citizen.email}
-                    </p>
-                  )}
+
+                {/* Map Background Pattern (Optional decorative element) */}
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 opacity-10 pointer-events-none">
+                  <svg width="200" height="200" viewBox="0 0 200 200" className="text-white">
+                    <circle cx="100" cy="100" r="80" fill="none" stroke="currentColor" strokeWidth="0.5" />
+                    <circle cx="100" cy="100" r="60" fill="none" stroke="currentColor" strokeWidth="0.5" />
+                    <circle cx="100" cy="100" r="40" fill="none" stroke="currentColor" strokeWidth="0.5" />
+                  </svg>
                 </div>
               </div>
             </div>
