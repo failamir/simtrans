@@ -39,6 +39,57 @@ export interface Citizen {
   createdAt: string;
   updatedAt: string;
   createdBy: string;
+  // Optional fields for scan detail page
+  regionKabupaten?: string;
+  regionKawasan?: string;
+  regionUPT?: string;
+  regionBlok?: string;
+  photoUrl?: string;
+  familyMembers?: FamilyMember[];
+  migration?: {
+    moveDate?: string;
+    type?: 'TRANSMIGRASI UMUM' | 'TRANSMIGRASI SWAKEL';
+    origin?: {
+      province?: string;
+      regency?: string;
+      district?: string;
+      village?: string;
+    };
+    destination?: {
+      province?: string;
+      regency?: string;
+      district?: string;
+      village?: string;
+    };
+  };
+  facilities?: {
+    usaha1?: {
+      area?: string;
+      coordinates?: string;
+      houseType?: string;
+    };
+    usaha2?: {
+      area?: string;
+      coordinates?: string;
+      houseType?: string;
+    };
+  };
+}
+
+export interface FamilyMember {
+  id?: string;
+  nik?: string;
+  name: string;
+  birthPlace?: string;
+  birthDate?: string;
+  gender?: 'male' | 'female';
+  maritalStatus?: 'single' | 'married' | 'divorced' | 'widowed';
+  religion?: string;
+  occupation?: string;
+  education?: string;
+  phone?: string;
+  email?: string;
+  relationToHead: string; // e.g., Istri, Anak 1, Anak 2
 }
 
 export interface Area {

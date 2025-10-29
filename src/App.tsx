@@ -8,6 +8,7 @@ import { Citizens } from './pages/Citizens';
 import { Users } from './pages/Users';
 import { Areas } from './pages/Areas';
 import { DistributionMap } from './pages/DistributionMap';
+import { ScanDetail } from './pages/ScanDetail';
 
 const AuthPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -30,17 +31,17 @@ const AppRoutes: React.FC = () => {
     );
   }
 
-  if (!user) {
-    return <AuthPage />;
-  }
-
   return (
     <Routes>
-      <Route path="/" element={<Dashboard />} />
+      {/* Public route for scan detail */}
+      <Route path="/scan/:id" element={<ScanDetail />} />
+
+      {/* Auth or landing */}
+      <Route path="/" element={user ? <Dashboard /> : <AuthPage />} />
       <Route 
         path="/citizens" 
         element={
-          user.role === 'admin' || user.role === 'staff' ? 
+          user && (user.role === 'admin' || user.role === 'staff') ? 
           <Citizens /> : 
           <Navigate to="/" replace />
         } 
@@ -48,7 +49,7 @@ const AppRoutes: React.FC = () => {
       <Route 
         path="/users" 
         element={
-          user.role === 'admin' ? 
+          user && user.role === 'admin' ? 
           <Users /> : 
           <Navigate to="/" replace />
         } 
@@ -56,7 +57,7 @@ const AppRoutes: React.FC = () => {
       <Route 
         path="/areas" 
         element={
-          user.role === 'admin' || user.role === 'staff' ? 
+          user && (user.role === 'admin' || user.role === 'staff') ? 
           <Areas /> : 
           <Navigate to="/" replace />
         } 
@@ -64,7 +65,7 @@ const AppRoutes: React.FC = () => {
       <Route 
         path="/distribution-map" 
         element={
-          user.role === 'admin' || user.role === 'staff' ? 
+          user && (user.role === 'admin' || user.role === 'staff') ? 
           <DistributionMap /> : 
           <Navigate to="/" replace />
         } 
@@ -72,7 +73,7 @@ const AppRoutes: React.FC = () => {
       <Route 
         path="/reports" 
         element={
-          user.role === 'admin' || user.role === 'staff' ? 
+          user && (user.role === 'admin' || user.role === 'staff') ? 
           <div>Reports Page - Coming Soon</div> : 
           <Navigate to="/" replace />
         } 
@@ -80,7 +81,7 @@ const AppRoutes: React.FC = () => {
       <Route 
         path="/statistics" 
         element={
-          user.role === 'admin' || user.role === 'staff' ? 
+          user && (user.role === 'admin' || user.role === 'staff') ? 
           <div>Statistics Page - Coming Soon</div> : 
           <Navigate to="/" replace />
         } 
@@ -88,7 +89,7 @@ const AppRoutes: React.FC = () => {
       <Route 
         path="/settings" 
         element={
-          user.role === 'admin' ? 
+          user && user.role === 'admin' ? 
           <div>Settings Page - Coming Soon</div> : 
           <Navigate to="/" replace />
         } 
@@ -96,7 +97,7 @@ const AppRoutes: React.FC = () => {
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
-};
+} 
 
 function App() {
   return (

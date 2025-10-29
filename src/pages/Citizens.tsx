@@ -5,6 +5,7 @@ import { VirtualIDCard } from '../components/Citizens/VirtualIDCard';
 import { Plus, Search, Filter, CreditCard as Edit, Trash2, Eye, Users, Download } from 'lucide-react';
 import { Citizen } from '../types';
 import { useAuth } from '../contexts/AuthContext';
+import { getAllCitizens, saveAllCitizens, upsertCitizens, removeCitizen } from '../store/citizens';
 
 export const Citizens: React.FC = () => {
   const { user } = useAuth();
@@ -63,6 +64,17 @@ export const Citizens: React.FC = () => {
     }
   ]);
 
+  // Load from store on mount, and seed if empty
+  React.useEffect(() => {
+    const stored = getAllCitizens();
+    if (stored.length === 0) {
+      saveAllCitizens(citizens);
+    } else {
+      setCitizens(stored);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const filteredCitizens = citizens.filter(citizen =>
     citizen.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     citizen.nik.includes(searchTerm) ||
@@ -81,7 +93,11 @@ export const Citizens: React.FC = () => {
       createdBy: user?.id || 'unknown'
     }));
 
-    setCitizens(prev => [...prev, ...newCitizens]);
+    setCitizens(prev => {
+      const merged = [...prev, ...newCitizens];
+      upsertCitizens(merged);
+      return merged;
+    });
     
     // Show success message
     alert(`Berhasil menambahkan ${newCitizens.length} data penduduk`);
@@ -94,7 +110,11 @@ export const Citizens: React.FC = () => {
 
   const handleDelete = (citizenId: string) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-      setCitizens(prev => prev.filter(c => c.id !== citizenId));
+      setCitizens(prev => {
+        const next = prev.filter(c => c.id !== citizenId);
+        removeCitizen(citizenId);
+        return next;
+      });
       alert('Data berhasil dihapus');
     }
   };

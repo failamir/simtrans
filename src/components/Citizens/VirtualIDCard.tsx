@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Share2, CreditCard, MapPin, User, FileImage, FileText, QrCode } from 'lucide-react';
+import { X, Share2, CreditCard, MapPin, User, FileImage, FileText } from 'lucide-react';
 import { Citizen } from '../../types';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -87,12 +87,13 @@ export const VirtualIDCard: React.FC<VirtualIDCardProps> = ({ citizen, isOpen, o
   };
 
   const handleShare = async () => {
+    const scanUrl = `${window.location.origin}/scan/${citizen.id}`;
     if (navigator.share) {
       try {
         await navigator.share({
           title: `KTP ${citizen.name}`,
           text: `Kartu Tanda Penduduk - ${citizen.name}`,
-          url: window.location.href
+          url: scanUrl
         });
       } catch (error) {
         console.log('Error sharing:', error);
@@ -105,6 +106,7 @@ NIK: ${citizen.nik}
 Nama: ${citizen.name}
 Tempat/Tgl Lahir: ${citizen.birthPlace}, ${formatDate(citizen.birthDate)}
 Alamat: ${citizen.address}, ${citizen.district}, ${citizen.city}
+ Link: ${scanUrl}
       `.trim();
       
       navigator.clipboard.writeText(cardData);
@@ -233,7 +235,12 @@ Alamat: ${citizen.address}, ${citizen.district}, ${citizen.city}
                   {/* Right Side - QR Code */}
                   <div className="flex flex-col items-center justify-start">
                     <div className="bg-white p-2 sm:p-3 rounded-lg shadow-lg">
-                      <QrCode className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 text-gray-800" />
+                      {/* External QR image without extra deps */}
+                      <img
+                        alt="QR"
+                        className="w-20 h-20 md:w-24 md:h-24"
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`${window.location.origin}/scan/${citizen.id}`)}`}
+                      />
                     </div>
                     <div className="mt-2 text-center">
                       <p className="text-[8px] sm:text-[9px] text-white font-medium">Catatan:</p>
