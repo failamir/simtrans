@@ -1,84 +1,103 @@
+import { supabase } from '../lib/supabase';
 import { Location } from '../types';
 
-// Mock data
-let mockLocations: Location[] = [
-    {
-        id: '1',
-        name: 'Lahan Pertanian Blok A',
-        type: 'Lahan',
-        description: 'Lahan pertanian untuk tanaman pangan',
-        address: 'Blok A, UPT Rumbiya',
+type LocationRow = {
+    id: string;
+    name: string;
+    type: string;
+    description: string | null;
+    address: string;
+    latitude: number;
+    longitude: number;
+    created_at: string;
+    updated_at: string;
+    created_by: string | null;
+};
+
+function mapRowToLocation(row: LocationRow): Location {
+    return {
+        id: row.id,
+        name: row.name,
+        type: row.type,
+        description: row.description || '',
+        address: row.address,
         coordinates: {
-            latitude: 0.5,
-            longitude: 101.5
+            latitude: row.latitude,
+            longitude: row.longitude
         },
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z',
-        createdBy: 'admin'
-    },
-    {
-        id: '2',
-        name: 'Balai Desa Rumbiya',
-        type: 'Fasilitas Umum',
-        description: 'Pusat kegiatan masyarakat desa',
-        address: 'Jl. Utama No. 1, Desa Rumbiya',
-        coordinates: {
-            latitude: 0.51,
-            longitude: 101.51
-        },
-        createdAt: '2024-01-02T00:00:00Z',
-        updatedAt: '2024-01-02T00:00:00Z',
-        createdBy: 'admin'
-    }
-];
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        createdBy: row.created_by ?? 'unknown'
+    };
+}
 
 export const listLocations = async (): Promise<Location[]> => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return [...mockLocations];
+    const { data, error } = await supabase
+        .from('locations')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return (data || []).map(mapRowToLocation);
 };
 
 export const getLocation = async (id: string): Promise<Location | undefined> => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return mockLocations.find(l => l.id === id);
+    const { data, error } = await supabase
+        .from('locations')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+    if (error) throw error;
+    return data ? mapRowToLocation(data) : undefined;
 };
 
 export const createLocation = async (data: Omit<Location, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>): Promise<Location> => {
-    await new Promise(resolve => setTimeout(resolve, 800));
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) throw new Error('User not authenticated');
 
-    const newLocation: Location = {
-        ...data,
-        id: Date.now().toString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        createdBy: 'current-user'
-    };
+    const { data: newLocation, error } = await supabase
+        .from('locations')
+        .insert([{
+            name: data.name,
+            type: data.type,
+            description: data.description,
+            address: data.address,
+            latitude: data.coordinates.latitude,
+            longitude: data.coordinates.longitude,
+            created_by: userData.user.id
+        }])
+        .select()
+        .single();
 
-    mockLocations = [...mockLocations, newLocation];
-    return newLocation;
+    if (error) throw error;
+    return mapRowToLocation(newLocation);
 };
 
 export const updateLocation = async (id: string, data: Partial<Location>): Promise<Location> => {
-    await new Promise(resolve => setTimeout(resolve, 800));
+    const updateData: any = { ...data };
+    if (data.coordinates) {
+        updateData.latitude = data.coordinates.latitude;
+        updateData.longitude = data.coordinates.longitude;
+        delete updateData.coordinates;
+    }
 
-    const index = mockLocations.findIndex(l => l.id === id);
-    if (index === -1) throw new Error('Location not found');
+    const { data: updatedLocation, error } = await supabase
+        .from('locations')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
 
-    const updatedLocation = {
-        ...mockLocations[index],
-        ...data,
-        updatedAt: new Date().toISOString()
-    };
-
-    mockLocations = [
-        ...mockLocations.slice(0, index),
-        updatedLocation,
-        ...mockLocations.slice(index + 1)
-    ];
-
-    return updatedLocation;
+    if (error) throw error;
+    return mapRowToLocation(updatedLocation);
 };
 
 export const deleteLocation = async (id: string): Promise<void> => {
-    await new Promise(resolve => setTimeout(resolve, 600));
-    mockLocations = mockLocations.filter(l => l.id !== id);
+    const { error } = await supabase
+        .from('locations')
+        .delete()
+        .eq('id', id);
+
+    if (error) throw error;
 };

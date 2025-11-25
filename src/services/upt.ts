@@ -1,96 +1,91 @@
+import { supabase } from '../lib/supabase';
 import { UPT } from '../types';
 
-// Mock data
-let mockUPTs: UPT[] = [
-    {
-        id: '1',
-        name: 'UPT Rumbiya',
-        location: 'Desa Rumbiya',
-        regency: 'Kab. Kampar',
-        province: 'Riau',
-        capacity: 500,
-        occupied: 350,
-        status: 'active',
-        createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z',
-        createdBy: 'admin'
-    },
-    {
-        id: '2',
-        name: 'UPT Salawati',
-        location: 'Distrik Salawati',
-        regency: 'Kab. Sorong',
-        province: 'Papua Barat Daya',
-        capacity: 300,
-        occupied: 120,
-        status: 'active',
-        createdAt: '2024-01-02T00:00:00Z',
-        updatedAt: '2024-01-02T00:00:00Z',
-        createdBy: 'admin'
-    },
-    {
-        id: '3',
-        name: 'UPT Mahalona',
-        location: 'Kec. Towuti',
-        regency: 'Kab. Luwu Timur',
-        province: 'Sulawesi Selatan',
-        capacity: 400,
-        occupied: 0,
-        status: 'planned',
-        createdAt: '2024-01-03T00:00:00Z',
-        updatedAt: '2024-01-03T00:00:00Z',
-        createdBy: 'admin'
-    }
-];
+type UPTRow = {
+    id: string;
+    name: string;
+    location: string;
+    regency: string;
+    province: string;
+    capacity: number;
+    occupied: number;
+    status: 'active' | 'inactive' | 'planned';
+    created_at: string;
+    updated_at: string;
+    created_by: string | null;
+};
+
+function mapRowToUPT(row: UPTRow): UPT {
+    return {
+        id: row.id,
+        name: row.name,
+        location: row.location,
+        regency: row.regency,
+        province: row.province,
+        capacity: row.capacity,
+        occupied: row.occupied,
+        status: row.status,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        createdBy: row.created_by ?? 'unknown'
+    };
+}
 
 export const listUPTs = async (): Promise<UPT[]> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return [...mockUPTs];
+    const { data, error } = await supabase
+        .from('upts')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return (data || []).map(mapRowToUPT);
 };
 
 export const getUPT = async (id: string): Promise<UPT | undefined> => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return mockUPTs.find(u => u.id === id);
+    const { data, error } = await supabase
+        .from('upts')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+    if (error) throw error;
+    return data ? mapRowToUPT(data) : undefined;
 };
 
 export const createUPT = async (data: Omit<UPT, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>): Promise<UPT> => {
-    await new Promise(resolve => setTimeout(resolve, 800));
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) throw new Error('User not authenticated');
 
-    const newUPT: UPT = {
-        ...data,
-        id: Date.now().toString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        createdBy: 'current-user' // In real app, get from auth context
-    };
+    const { data: newUPT, error } = await supabase
+        .from('upts')
+        .insert([{
+            ...data,
+            created_by: userData.user.id
+        }])
+        .select()
+        .single();
 
-    mockUPTs = [...mockUPTs, newUPT];
-    return newUPT;
+    if (error) throw error;
+    return mapRowToUPT(newUPT);
 };
 
 export const updateUPT = async (id: string, data: Partial<UPT>): Promise<UPT> => {
-    await new Promise(resolve => setTimeout(resolve, 800));
+    const { data: updatedUPT, error } = await supabase
+        .from('upts')
+        .update(data)
+        .eq('id', id)
+        .select()
+        .single();
 
-    const index = mockUPTs.findIndex(u => u.id === id);
-    if (index === -1) throw new Error('UPT not found');
-
-    const updatedUPT = {
-        ...mockUPTs[index],
-        ...data,
-        updatedAt: new Date().toISOString()
-    };
-
-    mockUPTs = [
-        ...mockUPTs.slice(0, index),
-        updatedUPT,
-        ...mockUPTs.slice(index + 1)
-    ];
-
-    return updatedUPT;
+    if (error) throw error;
+    return mapRowToUPT(updatedUPT);
 };
 
 export const deleteUPT = async (id: string): Promise<void> => {
-    await new Promise(resolve => setTimeout(resolve, 600));
-    mockUPTs = mockUPTs.filter(u => u.id !== id);
+    const { error } = await supabase
+        .from('upts')
+        .delete()
+        .eq('id', id);
+
+    if (error) throw error;
 };
