@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Plus, Trash2 } from 'lucide-react';
 import { Area } from '../../types';
 import { listAreas } from '../../services/areas';
 
@@ -17,7 +17,13 @@ export const RegencyForm: React.FC<RegencyFormProps> = ({ isOpen, onClose, onSub
         parentId: '',
         population: 0,
         area: 0,
-        isActive: true
+        code: '',
+        name: '',
+        parentId: '',
+        population: 0,
+        area: 0,
+        isActive: true,
+        economicPotential: [] as { sector: string; potential: string; description?: string }[]
     });
     const [provinces, setProvinces] = useState<Area[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,7 +55,10 @@ export const RegencyForm: React.FC<RegencyFormProps> = ({ isOpen, onClose, onSub
                 parentId: initialData.parentId || '',
                 population: initialData.population || 0,
                 area: initialData.area || 0,
-                isActive: initialData.isActive
+                population: initialData.population || 0,
+                area: initialData.area || 0,
+                isActive: initialData.isActive,
+                economicPotential: initialData.economicPotential || []
             });
         } else {
             setFormData({
@@ -58,7 +67,10 @@ export const RegencyForm: React.FC<RegencyFormProps> = ({ isOpen, onClose, onSub
                 parentId: '',
                 population: 0,
                 area: 0,
-                isActive: true
+                population: 0,
+                area: 0,
+                isActive: true,
+                economicPotential: []
             });
         }
     }, [initialData, isOpen]);
@@ -72,7 +84,8 @@ export const RegencyForm: React.FC<RegencyFormProps> = ({ isOpen, onClose, onSub
                 type: 'city',
                 level: 2, // 1=Province, 2=City/Regency
                 postalCode: '', // Optional
-                coordinates: { latitude: 0, longitude: 0 } // Default
+                coordinates: { latitude: 0, longitude: 0 }, // Default
+                economicPotential: formData.economicPotential
             });
         } catch (error) {
             console.error(error);
@@ -178,6 +191,87 @@ export const RegencyForm: React.FC<RegencyFormProps> = ({ isOpen, onClose, onSub
                                         onChange={(e) => setFormData({ ...formData, area: parseFloat(e.target.value) || 0 })}
                                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                                     />
+                                </div>
+                            </div>
+
+                            {/* Economic Potential Section */}
+                            <div className="border-t pt-4">
+                                <div className="flex justify-between items-center mb-2">
+                                    <label className="block text-sm font-medium text-gray-700">
+                                        Potensi Ekonomi
+                                    </label>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({
+                                            ...formData,
+                                            economicPotential: [...formData.economicPotential, { sector: '', potential: '', description: '' }]
+                                        })}
+                                        className="text-sm text-blue-600 hover:text-blue-700 flex items-center"
+                                    >
+                                        <Plus className="w-4 h-4 mr-1" />
+                                        Tambah Potensi
+                                    </button>
+                                </div>
+                                <div className="space-y-3">
+                                    {formData.economicPotential.map((item, index) => (
+                                        <div key={index} className="bg-gray-50 p-3 rounded-lg relative group">
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const newPotential = [...formData.economicPotential];
+                                                    newPotential.splice(index, 1);
+                                                    setFormData({ ...formData, economicPotential: newPotential });
+                                                }}
+                                                className="absolute top-2 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                            <div className="grid grid-cols-2 gap-3 mb-2">
+                                                <div>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Sektor (mis: Pertanian)"
+                                                        value={item.sector}
+                                                        onChange={(e) => {
+                                                            const newPotential = [...formData.economicPotential];
+                                                            newPotential[index].sector = e.target.value;
+                                                            setFormData({ ...formData, economicPotential: newPotential });
+                                                        }}
+                                                        className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 outline-none"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Potensi (mis: Padi)"
+                                                        value={item.potential}
+                                                        onChange={(e) => {
+                                                            const newPotential = [...formData.economicPotential];
+                                                            newPotential[index].potential = e.target.value;
+                                                            setFormData({ ...formData, economicPotential: newPotential });
+                                                        }}
+                                                        className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 outline-none"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <input
+                                                type="text"
+                                                placeholder="Keterangan (Opsional)"
+                                                value={item.description || ''}
+                                                onChange={(e) => {
+                                                    const newPotential = [...formData.economicPotential];
+                                                    newPotential[index].description = e.target.value;
+                                                    setFormData({ ...formData, economicPotential: newPotential });
+                                                }}
+                                                className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 outline-none"
+                                            />
+                                        </div>
+                                    ))}
+                                    {formData.economicPotential.length === 0 && (
+                                        <p className="text-sm text-gray-500 text-center py-2 italic">
+                                            Belum ada data potensi ekonomi
+                                        </p>
+                                    )}
                                 </div>
                             </div>
 

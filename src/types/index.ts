@@ -107,6 +107,11 @@ export interface Area {
     latitude: number;
     longitude: number;
   };
+  economicPotential?: {
+    sector: string;
+    potential: string;
+    description?: string;
+  }[];
   createdAt: string;
   updatedAt: string;
   createdBy: string;

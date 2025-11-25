@@ -17,6 +17,7 @@ type AreaRow = {
   created_at: string;
   updated_at: string;
   created_by: string | null;
+  economic_potential: any[] | null;
 };
 
 function mapRowToArea(row: AreaRow): Area {
@@ -38,6 +39,7 @@ function mapRowToArea(row: AreaRow): Area {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     createdBy: row.created_by ?? 'unknown',
+    economicPotential: row.economic_potential ?? undefined,
   };
 }
 
@@ -77,6 +79,7 @@ export async function createArea(payload: Omit<Area, 'id' | 'createdAt' | 'updat
     latitude: payload.coordinates?.latitude,
     longitude: payload.coordinates?.longitude,
     created_by: userId,
+    economic_potential: payload.economicPotential,
   };
 
   const { data, error } = await supabase
@@ -105,6 +108,7 @@ export async function updateArea(id: string, payload: Partial<Area>): Promise<Ar
     updateData.latitude = payload.coordinates.latitude;
     updateData.longitude = payload.coordinates.longitude;
   }
+  if (payload.economicPotential) updateData.economic_potential = payload.economicPotential;
 
   const { data, error } = await supabase
     .from('areas')

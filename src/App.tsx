@@ -12,6 +12,7 @@ import { Regencies } from './pages/Regencies';
 import { Locations } from './pages/Locations';
 import { DistributionMap } from './pages/DistributionMap';
 import { ScanDetail } from './pages/ScanDetail';
+import { Settings } from './pages/Settings';
 
 const AuthPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -128,7 +129,7 @@ const AppRoutes: React.FC = () => {
         path="/settings"
         element={
           user && user.role === 'admin' ?
-            <div>Settings Page - Coming Soon</div> :
+            <Settings /> :
             <Navigate to="/login" replace />
         }
       />
