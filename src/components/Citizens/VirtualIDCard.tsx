@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { X, Share2, CreditCard, MapPin, User, FileImage, FileText } from 'lucide-react';
 import { Citizen } from '../../types';
+import { getUPT } from '../../services/upt';
+import { getArea } from '../../services/areas';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -12,7 +14,35 @@ interface VirtualIDCardProps {
 
 export const VirtualIDCard: React.FC<VirtualIDCardProps> = ({ citizen, isOpen, onClose }) => {
   const [showBack, setShowBack] = useState(false);
-  
+  const [uptName, setUptName] = useState<string>('');
+  const [kabupatenName, setKabupatenName] = useState<string>('');
+
+  React.useEffect(() => {
+    const loadRegionData = async () => {
+      if (citizen.regionUPT) {
+        try {
+          const upt = await getUPT(citizen.regionUPT);
+          if (upt) setUptName(upt.name);
+        } catch (error) {
+          console.error('Error loading UPT:', error);
+        }
+      }
+
+      if (citizen.regionKabupaten) {
+        try {
+          const area = await getArea(citizen.regionKabupaten);
+          if (area) setKabupatenName(area.name);
+        } catch (error) {
+          console.error('Error loading Kabupaten:', error);
+        }
+      }
+    };
+
+    if (isOpen) {
+      loadRegionData();
+    }
+  }, [citizen, isOpen]);
+
   if (!isOpen) return null;
 
   const formatDate = (dateString: string): string => {
@@ -77,7 +107,7 @@ export const VirtualIDCard: React.FC<VirtualIDCardProps> = ({ citizen, isOpen, o
       // Calculate dimensions to fit the card properly
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-      
+
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
       pdf.save(`KTP_${citizen.name.replace(/\s+/g, '_')}.pdf`);
     } catch (error) {
@@ -108,7 +138,7 @@ Tempat/Tgl Lahir: ${citizen.birthPlace}, ${formatDate(citizen.birthDate)}
 Alamat: ${citizen.address}, ${citizen.district}, ${citizen.city}
  Link: ${scanUrl}
       `.trim();
-      
+
       navigator.clipboard.writeText(cardData);
       alert('Data KTP telah disalin ke clipboard');
     }
@@ -143,16 +173,15 @@ Alamat: ${citizen.address}, ${citizen.district}, ${citizen.city}
             </button>
           </div>
 
-          <div 
+          <div
             id="virtual-id-card"
             className="relative w-full max-w-2xl mx-auto rounded-2xl shadow-2xl overflow-hidden"
             style={{ aspectRatio: '1.6/1' }}
           >
             {/* Front Side */}
-            <div 
-              className={`absolute inset-0 transition-all duration-500 ${
-                showBack ? 'opacity-0 pointer-events-none' : 'opacity-100'
-              }`}
+            <div
+              className={`absolute inset-0 transition-all duration-500 ${showBack ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                }`}
               style={{
                 background: 'linear-gradient(135deg, #1e3a5f 0%, #2d5a7b 100%)'
               }}
@@ -177,7 +206,7 @@ Alamat: ${citizen.address}, ${citizen.district}, ${citizen.city}
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* SIMTRANS Text */}
                   <div className="text-center">
                     <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2">SIMTRANS</h2>
@@ -195,10 +224,9 @@ Alamat: ${citizen.address}, ${citizen.district}, ${citizen.city}
             </div>
 
             {/* Back Side */}
-            <div 
-              className={`absolute inset-0 transition-all duration-500 ${
-                showBack ? 'opacity-100' : 'opacity-0 pointer-events-none'
-              }`}
+            <div
+              className={`absolute inset-0 transition-all duration-500 ${showBack ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                }`}
               style={{
                 background: 'linear-gradient(135deg, #1e3a5f 0%, #2d5a7b 100%)'
               }}
@@ -208,7 +236,9 @@ Alamat: ${citizen.address}, ${citizen.district}, ${citizen.city}
                 <h3 className="text-sm sm:text-base md:text-lg font-bold tracking-wide mb-1">KARTU IDENTITAS TRANSMIGRASI</h3>
                 <div className="flex items-center justify-center">
                   <div className="border-b-2 border-yellow-400 pb-1">
-                    <p className="text-yellow-400 text-xs sm:text-sm md:text-base font-bold">UPT. TORIRE</p>
+                    <p className="text-yellow-400 text-xs sm:text-sm md:text-base font-bold uppercase">
+                      {uptName || 'UPT. BELUM DITENTUKAN'}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -228,7 +258,15 @@ Alamat: ${citizen.address}, ${citizen.district}, ${citizen.city}
                     </div>
                     <div>
                       <p className="text-[10px] sm:text-xs font-medium opacity-90">• ASAL DAERAH</p>
-                      <p className="text-sm sm:text-base md:text-lg font-bold text-yellow-400 ml-3">{citizen.birthPlace} - {citizen.province}</p>
+                      <p className="text-sm sm:text-base md:text-lg font-bold text-yellow-400 ml-3">
+                        {citizen.birthPlace} - {citizen.province}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] sm:text-xs font-medium opacity-90">• TUJUAN</p>
+                      <p className="text-sm sm:text-base md:text-lg font-bold text-yellow-400 ml-3">
+                        {kabupatenName || 'BELUM DITENTUKAN'}
+                      </p>
                     </div>
                   </div>
 
@@ -294,7 +332,7 @@ Alamat: ${citizen.address}, ${citizen.district}, ${citizen.city}
               <Share2 className="w-4 h-4" />
               <span>Bagikan</span>
             </button>
-            
+
             <button
               onClick={handleDownloadImage}
               className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
@@ -302,7 +340,7 @@ Alamat: ${citizen.address}, ${citizen.district}, ${citizen.city}
               <FileImage className="w-4 h-4" />
               <span>Save as Image</span>
             </button>
-            
+
             <button
               onClick={handleDownloadPDF}
               className="flex items-center space-x-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"

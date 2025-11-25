@@ -7,9 +7,7 @@ import {
     Search,
     Filter,
     Edit,
-    Trash2,
-    Navigation,
-    Info
+    Trash2
 } from 'lucide-react';
 import { Location } from '../types';
 import { listLocations, deleteLocation, createLocation, updateLocation } from '../services/locations';

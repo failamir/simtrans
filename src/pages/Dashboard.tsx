@@ -4,7 +4,7 @@ import { StatsCard } from '../components/Dashboard/StatsCard';
 import { QuickActions } from '../components/Dashboard/QuickActions';
 import { CitizenForm } from '../components/Citizens/CitizenForm';
 import { VirtualIDCard } from '../components/Citizens/VirtualIDCard';
-import { Users, UserPlus, Activity, Building } from 'lucide-react';
+import { Users, UserPlus, Activity, Building, Building2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Citizen } from '../types';
 import { getDashboardStats, DashboardStats } from '../services/dashboard';
@@ -140,7 +140,7 @@ export const Dashboard: React.FC = () => {
                 {recentActivities.map((activity) => (
                   <div key={activity.id} className="flex items-start space-x-3 pb-4 border-b border-gray-100 last:border-b-0">
                     <div className={`w-2 h-2 rounded-full mt-2 ${activity.type === 'success' ? 'bg-green-500' :
-                        activity.type === 'info' ? 'bg-blue-500' : 'bg-yellow-500'
+                      activity.type === 'info' ? 'bg-blue-500' : 'bg-yellow-500'
                       }`} />
                     <div className="flex-1">
                       <p className="text-sm font-medium text-gray-900">{activity.action}</p>

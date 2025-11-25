@@ -25,7 +25,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
   const location = useLocation();
 
   const navigation = [
-    { name: 'Dashboard', href: '/', icon: Home, roles: ['admin', 'staff', 'user'] },
+    { name: 'Dashboard', href: '/dashboard', icon: Home, roles: ['admin', 'staff', 'user'] },
     { name: 'Data Transmigran', href: '/transmigrants', icon: Users, roles: ['admin', 'staff'] },
     { name: 'Data Master - UPT', href: '/upt', icon: Building2, roles: ['admin', 'staff'] },
     { name: 'Data Master - Kabupaten', href: '/regencies', icon: Map, roles: ['admin', 'staff'] },
