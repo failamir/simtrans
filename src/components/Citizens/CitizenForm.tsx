@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2, Save, User, Users } from 'lucide-react';
-import { Citizen } from '../../types';
+import { Citizen, UPT, Area } from '../../types';
+import { listUPTs } from '../../services/upt';
+import { listAreas } from '../../services/areas';
 
 interface CitizenFormProps {
   isOpen: boolean;
@@ -52,12 +54,33 @@ export const CitizenForm: React.FC<CitizenFormProps> = ({
     district: '',
     city: '',
     province: '',
-    postalCode: ''
+    postalCode: '',
+    regionUPT: '',
+    regionKabupaten: ''
   });
+
+  const [uptList, setUptList] = useState<UPT[]>([]);
+  const [kabupatenList, setKabupatenList] = useState<Area[]>([]);
 
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([
     { ...initialMember, tempId: '1', relationToHead: 'Kepala Keluarga' }
   ]);
+
+  useEffect(() => {
+    const loadMasterData = async () => {
+      try {
+        const [upts, areas] = await Promise.all([
+          listUPTs(),
+          listAreas()
+        ]);
+        setUptList(upts);
+        setKabupatenList(areas.filter(a => a.type === 'city'));
+      } catch (error) {
+        console.error('Failed to load master data:', error);
+      }
+    };
+    loadMasterData();
+  }, []);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -65,7 +88,7 @@ export const CitizenForm: React.FC<CitizenFormProps> = ({
   const relationOptions = [
     'Kepala Keluarga',
     'Istri',
-    'Suami', 
+    'Suami',
     'Anak',
     'Menantu',
     'Cucu',
@@ -132,6 +155,8 @@ export const CitizenForm: React.FC<CitizenFormProps> = ({
     if (!familyData.city.trim()) newErrors.city = 'Kota harus diisi';
     if (!familyData.province.trim()) newErrors.province = 'Provinsi harus diisi';
     if (!familyData.postalCode.trim()) newErrors.postalCode = 'Kode pos harus diisi';
+    if (!familyData.regionUPT) newErrors.regionUPT = 'UPT harus dipilih';
+    if (!familyData.regionKabupaten) newErrors.regionKabupaten = 'Kabupaten tujuan harus dipilih';
 
     // Validate family members
     familyMembers.forEach((member, index) => {
@@ -140,7 +165,7 @@ export const CitizenForm: React.FC<CitizenFormProps> = ({
       if (!member.birthPlace.trim()) newErrors[`member_${index}_birthPlace`] = 'Tempat lahir harus diisi';
       if (!member.birthDate) newErrors[`member_${index}_birthDate`] = 'Tanggal lahir harus diisi';
       if (!member.occupation.trim()) newErrors[`member_${index}_occupation`] = 'Pekerjaan harus diisi';
-      
+
       // Validate NIK format (16 digits)
       if (member.nik && !/^\d{16}$/.test(member.nik)) {
         newErrors[`member_${index}_nik`] = 'NIK harus 16 digit angka';
@@ -160,7 +185,7 @@ export const CitizenForm: React.FC<CitizenFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setIsSubmitting(true);
@@ -182,19 +207,23 @@ export const CitizenForm: React.FC<CitizenFormProps> = ({
         maritalStatus: member.maritalStatus,
         religion: member.religion,
         occupation: member.occupation,
-        education: member.education
+        education: member.education,
+        regionUPT: familyData.regionUPT,
+        regionKabupaten: familyData.regionKabupaten
       }));
 
       await onSubmit(citizensData);
       onClose();
-      
+
       // Reset form
       setFamilyData({
         address: '',
         district: '',
         city: '',
         province: '',
-        postalCode: ''
+        postalCode: '',
+        regionUPT: '',
+        regionKabupaten: ''
       });
       setFamilyMembers([{ ...initialMember, tempId: '1', relationToHead: 'Kepala Keluarga' }]);
       setErrors({});
@@ -235,6 +264,48 @@ export const CitizenForm: React.FC<CitizenFormProps> = ({
                 <User className="w-5 h-5 mr-2 text-blue-600" />
                 Alamat Keluarga
               </h3>
+
+              {/* Lokasi Transmigrasi Section */}
+              <div className="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-100">
+                <h4 className="text-sm font-semibold text-blue-800 mb-3">Lokasi Transmigrasi</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Kabupaten Tujuan *
+                    </label>
+                    <select
+                      value={familyData.regionKabupaten}
+                      onChange={(e) => updateFamilyData('regionKabupaten', e.target.value)}
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${errors.regionKabupaten ? 'border-red-300' : 'border-gray-300'
+                        }`}
+                    >
+                      <option value="">Pilih Kabupaten</option>
+                      {kabupatenList.map(kab => (
+                        <option key={kab.id} value={kab.id}>{kab.name}</option>
+                      ))}
+                    </select>
+                    {errors.regionKabupaten && <p className="text-red-500 text-sm mt-1">{errors.regionKabupaten}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      UPT Tujuan *
+                    </label>
+                    <select
+                      value={familyData.regionUPT}
+                      onChange={(e) => updateFamilyData('regionUPT', e.target.value)}
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${errors.regionUPT ? 'border-red-300' : 'border-gray-300'
+                        }`}
+                    >
+                      <option value="">Pilih UPT</option>
+                      {uptList.map(upt => (
+                        <option key={upt.id} value={upt.id}>{upt.name}</option>
+                      ))}
+                    </select>
+                    {errors.regionUPT && <p className="text-red-500 text-sm mt-1">{errors.regionUPT}</p>}
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -243,9 +314,8 @@ export const CitizenForm: React.FC<CitizenFormProps> = ({
                   <textarea
                     value={familyData.address}
                     onChange={(e) => updateFamilyData('address', e.target.value)}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${
-                      errors.address ? 'border-red-300' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${errors.address ? 'border-red-300' : 'border-gray-300'
+                      }`}
                     rows={3}
                     placeholder="Masukkan alamat lengkap"
                   />
@@ -259,9 +329,8 @@ export const CitizenForm: React.FC<CitizenFormProps> = ({
                     type="text"
                     value={familyData.district}
                     onChange={(e) => updateFamilyData('district', e.target.value)}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${
-                      errors.district ? 'border-red-300' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${errors.district ? 'border-red-300' : 'border-gray-300'
+                      }`}
                     placeholder="Masukkan kecamatan"
                   />
                   {errors.district && <p className="text-red-500 text-sm mt-1">{errors.district}</p>}
@@ -274,9 +343,8 @@ export const CitizenForm: React.FC<CitizenFormProps> = ({
                     type="text"
                     value={familyData.city}
                     onChange={(e) => updateFamilyData('city', e.target.value)}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${
-                      errors.city ? 'border-red-300' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${errors.city ? 'border-red-300' : 'border-gray-300'
+                      }`}
                     placeholder="Masukkan kota/kabupaten"
                   />
                   {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
@@ -289,9 +357,8 @@ export const CitizenForm: React.FC<CitizenFormProps> = ({
                     type="text"
                     value={familyData.province}
                     onChange={(e) => updateFamilyData('province', e.target.value)}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-colors ${
-                      errors.province ? 'border-red-300' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-colors ${errors.province ? 'border-red-300' : 'border-gray-300'
+                      }`}
                     placeholder="Masukkan provinsi"
                   />
                   {errors.province && <p className="text-red-500 text-sm mt-1">{errors.province}</p>}
@@ -304,9 +371,8 @@ export const CitizenForm: React.FC<CitizenFormProps> = ({
                     type="text"
                     value={familyData.postalCode}
                     onChange={(e) => updateFamilyData('postalCode', e.target.value)}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${
-                      errors.postalCode ? 'border-red-300' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${errors.postalCode ? 'border-red-300' : 'border-gray-300'
+                      }`}
                     placeholder="Masukkan kode pos"
                   />
                   {errors.postalCode && <p className="text-red-500 text-sm mt-1">{errors.postalCode}</p>}
@@ -382,9 +448,8 @@ export const CitizenForm: React.FC<CitizenFormProps> = ({
                           type="text"
                           value={member.nik}
                           onChange={(e) => updateFamilyMember(member.tempId, 'nik', e.target.value)}
-                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${
-                            errors[`member_${index}_nik`] ? 'border-red-300' : 'border-gray-300'
-                          }`}
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${errors[`member_${index}_nik`] ? 'border-red-300' : 'border-gray-300'
+                            }`}
                           placeholder="16 digit NIK"
                           maxLength={16}
                         />
@@ -401,9 +466,8 @@ export const CitizenForm: React.FC<CitizenFormProps> = ({
                           type="text"
                           value={member.name}
                           onChange={(e) => updateFamilyMember(member.tempId, 'name', e.target.value)}
-                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${
-                            errors[`member_${index}_name`] ? 'border-red-300' : 'border-gray-300'
-                          }`}
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${errors[`member_${index}_name`] ? 'border-red-300' : 'border-gray-300'
+                            }`}
                           placeholder="Masukkan nama lengkap"
                         />
                         {errors[`member_${index}_name`] && (
@@ -419,9 +483,8 @@ export const CitizenForm: React.FC<CitizenFormProps> = ({
                           type="text"
                           value={member.birthPlace}
                           onChange={(e) => updateFamilyMember(member.tempId, 'birthPlace', e.target.value)}
-                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${
-                            errors[`member_${index}_birthPlace`] ? 'border-red-300' : 'border-gray-300'
-                          }`}
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${errors[`member_${index}_birthPlace`] ? 'border-red-300' : 'border-gray-300'
+                            }`}
                           placeholder="Masukkan tempat lahir"
                         />
                         {errors[`member_${index}_birthPlace`] && (
@@ -437,9 +500,8 @@ export const CitizenForm: React.FC<CitizenFormProps> = ({
                           type="date"
                           value={member.birthDate}
                           onChange={(e) => updateFamilyMember(member.tempId, 'birthDate', e.target.value)}
-                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${
-                            errors[`member_${index}_birthDate`] ? 'border-red-300' : 'border-gray-300'
-                          }`}
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${errors[`member_${index}_birthDate`] ? 'border-red-300' : 'border-gray-300'
+                            }`}
                         />
                         {errors[`member_${index}_birthDate`] && (
                           <p className="text-red-500 text-sm mt-1">{errors[`member_${index}_birthDate`]}</p>
@@ -499,9 +561,8 @@ export const CitizenForm: React.FC<CitizenFormProps> = ({
                           type="text"
                           value={member.occupation}
                           onChange={(e) => updateFamilyMember(member.tempId, 'occupation', e.target.value)}
-                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${
-                            errors[`member_${index}_occupation`] ? 'border-red-300' : 'border-gray-300'
-                          }`}
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${errors[`member_${index}_occupation`] ? 'border-red-300' : 'border-gray-300'
+                            }`}
                           placeholder="Masukkan pekerjaan"
                         />
                         {errors[`member_${index}_occupation`] && (
