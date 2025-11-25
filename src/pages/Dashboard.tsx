@@ -7,6 +7,7 @@ import { VirtualIDCard } from '../components/Citizens/VirtualIDCard';
 import { Users, UserPlus, Activity, Building } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { Citizen } from '../types';
+import { getDashboardStats, DashboardStats } from '../services/dashboard';
 
 export const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -22,19 +23,28 @@ export const Dashboard: React.FC = () => {
     };
 
     window.addEventListener('showVirtualIDCard', handleShowVirtualIDCard as EventListener);
-    
+
     return () => {
       window.removeEventListener('showVirtualIDCard', handleShowVirtualIDCard as EventListener);
     };
   }, []);
 
-  // Mock data - in real app, fetch from API
-  const stats = {
-    totalCitizens: 145623,
-    newRegistrations: 342,
-    activeUsers: 28,
-    totalDistricts: 15
-  };
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
+
+  React.useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const data = await getDashboardStats();
+        setStats(data);
+      } catch (error) {
+        console.error('Failed to load dashboard stats:', error);
+      } finally {
+        setIsLoadingStats(false);
+      }
+    };
+    loadStats();
+  }, []);
 
   const recentActivities = [
     {
@@ -67,7 +77,7 @@ export const Dashboard: React.FC = () => {
   const handleAddCitizens = async (citizensData: Omit<Citizen, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>[]) => {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     // Show success message
     alert(`Berhasil menambahkan ${citizensData.length} data penduduk dari dashboard`);
   };
@@ -88,30 +98,30 @@ export const Dashboard: React.FC = () => {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatsCard
-            title="Total Penduduk"
-            value={stats.totalCitizens}
+            title="Total Transmigran"
+            value={stats?.totalCitizens || 0}
             icon={Users}
             trend={{ value: 2.5, isPositive: true }}
             color="blue"
           />
           <StatsCard
-            title="Registrasi Baru"
-            value={stats.newRegistrations}
-            icon={UserPlus}
+            title="Total UPT"
+            value={stats?.totalUPTs || 0}
+            icon={Building}
             trend={{ value: 12, isPositive: true }}
             color="green"
           />
           <StatsCard
-            title="Pengguna Aktif"
-            value={stats.activeUsers}
+            title="Total Lokasi"
+            value={stats?.totalLocations || 0}
             icon={Activity}
-            trend={{ value: 5, isPositive: false }}
+            trend={{ value: 5, isPositive: true }}
             color="yellow"
           />
           <StatsCard
-            title="Total Kecamatan"
-            value={stats.totalDistricts}
-            icon={Building}
+            title="Total Kawasan"
+            value={stats?.totalAreas || 0}
+            icon={Building2}
             color="purple"
           />
         </div>
@@ -129,10 +139,9 @@ export const Dashboard: React.FC = () => {
               <div className="space-y-4">
                 {recentActivities.map((activity) => (
                   <div key={activity.id} className="flex items-start space-x-3 pb-4 border-b border-gray-100 last:border-b-0">
-                    <div className={`w-2 h-2 rounded-full mt-2 ${
-                      activity.type === 'success' ? 'bg-green-500' :
-                      activity.type === 'info' ? 'bg-blue-500' : 'bg-yellow-500'
-                    }`} />
+                    <div className={`w-2 h-2 rounded-full mt-2 ${activity.type === 'success' ? 'bg-green-500' :
+                        activity.type === 'info' ? 'bg-blue-500' : 'bg-yellow-500'
+                      }`} />
                     <div className="flex-1">
                       <p className="text-sm font-medium text-gray-900">{activity.action}</p>
                       <p className="text-xs text-gray-500">oleh {activity.user} • {activity.time}</p>
@@ -152,7 +161,7 @@ export const Dashboard: React.FC = () => {
                 🚀 Fitur Baru: Pendaftaran Keluarga Dinamis
               </h3>
               <p className="text-gray-600 mb-4">
-                Sekarang Anda dapat menambahkan seluruh anggota keluarga dalam satu form yang mudah digunakan. 
+                Sekarang Anda dapat menambahkan seluruh anggota keluarga dalam satu form yang mudah digunakan.
                 Tambah atau hapus anggota keluarga sesuai kebutuhan dengan validasi otomatis.
               </p>
               <ul className="text-sm text-gray-600 space-y-1">
