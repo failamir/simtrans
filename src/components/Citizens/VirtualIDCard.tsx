@@ -5,6 +5,7 @@ import { getUPT } from '../../services/upt';
 import { getArea } from '../../services/areas';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import logo from '../../assets/logo.png';
 
 interface VirtualIDCardProps {
   citizen: Citizen;
@@ -199,9 +200,11 @@ Alamat: ${citizen.address}, ${citizen.district}, ${citizen.city}
                     <div className="relative">
                       <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border-4 border-blue-600 flex items-center justify-center bg-white shadow-lg">
                         <div className="text-center">
-                          <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 mx-auto bg-gradient-to-br from-blue-500 via-blue-600 to-green-500 rounded-full flex items-center justify-center">
-                            <User className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-white" />
-                          </div>
+                          <img
+                            src={logo}
+                            alt="Logo"
+                            className="w-14 h-14 sm:w-16 sm:h-16 md:w-24 md:h-24 object-contain"
+                          />
                         </div>
                       </div>
                     </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Building2, Loader } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import logo from '../../assets/logo.png';
 
 interface LoginFormProps {
   onToggleMode: () => void;
@@ -43,8 +44,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
           {/* Header */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
-                <Building2 className="w-8 h-8 text-white" />
+              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-md border-2 border-blue-100">
+                <img src={logo} alt="SIMTRANS" className="w-12 h-12 object-contain" />
               </div>
             </div>
             <h2 className="text-3xl font-bold text-gray-900">SIMTRANS</h2>

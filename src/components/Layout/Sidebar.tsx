@@ -14,6 +14,7 @@ import {
   Map
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import logo from '../../assets/logo.png';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -61,7 +62,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200">
             <div className="flex items-center space-x-2">
-              <Building2 className="w-8 h-8 text-blue-600" />
+              <img src={logo} alt="SIMTRANS" className="w-8 h-8 object-contain" />
               <h2 className="text-xl font-bold text-gray-900">SIMTRANS</h2>
             </div>
             <button
