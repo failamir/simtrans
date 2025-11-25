@@ -1,11 +1,11 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { 
-  Home, 
-  Users, 
-  UserCheck, 
-  BarChart3, 
-  FileText, 
+import {
+  Home,
+  Users,
+  UserCheck,
+  BarChart3,
+  FileText,
   Settings,
   Building2,
   Menu,
@@ -26,8 +26,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: Home, roles: ['admin', 'staff', 'user'] },
-    { name: 'Data Penduduk', href: '/citizens', icon: Users, roles: ['admin', 'staff'] },
-    { name: 'Manajemen Kawasan', href: '/areas', icon: MapPin, roles: ['admin', 'staff'] },
+    { name: 'Data Transmigran', href: '/transmigrants', icon: Users, roles: ['admin', 'staff'] },
+    { name: 'Data Master - UPT', href: '/upt', icon: Building2, roles: ['admin', 'staff'] },
+    { name: 'Data Master - Kabupaten', href: '/regencies', icon: Map, roles: ['admin', 'staff'] },
+    { name: 'Data Master - Kawasan', href: '/areas', icon: MapPin, roles: ['admin', 'staff'] },
+    { name: 'Data Master - Lokasi', href: '/locations', icon: MapPin, roles: ['admin', 'staff'] },
     { name: 'Peta Penyebaran', href: '/distribution-map', icon: Map, roles: ['admin', 'staff'] },
     { name: 'Manajemen User', href: '/users', icon: UserCheck, roles: ['admin'] },
     { name: 'Laporan', href: '/reports', icon: FileText, roles: ['admin', 'staff'] },
@@ -35,7 +38,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
     { name: 'Pengaturan', href: '/settings', icon: Settings, roles: ['admin'] },
   ];
 
-  const filteredNavigation = navigation.filter(item => 
+  const filteredNavigation = navigation.filter(item =>
     item.roles.includes(user?.role || 'user')
   );
 
@@ -43,7 +46,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
     <>
       {/* Mobile overlay */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
           onClick={onToggle}
         />
@@ -74,15 +77,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
             {filteredNavigation.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.href;
-              
+
               return (
                 <NavLink
                   key={item.name}
                   to={item.href}
                   className={`
                     flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors
-                    ${isActive 
-                      ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700' 
+                    ${isActive
+                      ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                     }
                   `}

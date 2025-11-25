@@ -112,6 +112,21 @@ export interface Area {
   createdBy: string;
 }
 
+export interface Location {
+  id: string;
+  name: string;
+  type: string;
+  description: string;
+  address: string;
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+}
+
 export interface AreaHierarchy extends Area {
   children?: AreaHierarchy[];
   parent?: Area;
@@ -146,4 +161,18 @@ export interface FilterOptions {
   maritalStatus: string;
   sortBy: string;
   sortOrder: 'asc' | 'desc';
+}
+
+export interface UPT {
+  id: string;
+  name: string;
+  location: string;
+  regency: string;
+  province: string;
+  capacity: number;
+  occupied: number;
+  status: 'active' | 'inactive' | 'planned';
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
 }

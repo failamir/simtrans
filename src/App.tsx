@@ -7,6 +7,9 @@ import { Dashboard } from './pages/Dashboard';
 import { Citizens } from './pages/Citizens';
 import { Users } from './pages/Users';
 import { Areas } from './pages/Areas';
+import { UPT } from './pages/UPT';
+import { Regencies } from './pages/Regencies';
+import { Locations } from './pages/Locations';
 import { DistributionMap } from './pages/DistributionMap';
 import { ScanDetail } from './pages/ScanDetail';
 
@@ -38,66 +41,94 @@ const AppRoutes: React.FC = () => {
 
       {/* Auth or landing */}
       <Route path="/" element={user ? <Dashboard /> : <AuthPage />} />
-      <Route 
-        path="/citizens" 
+      <Route
+        path="/transmigrants"
         element={
-          user && (user.role === 'admin' || user.role === 'staff') ? 
-          <Citizens /> : 
-          <Navigate to="/" replace />
-        } 
+          user && (user.role === 'admin' || user.role === 'staff') ?
+            <Citizens /> :
+            <Navigate to="/" replace />
+        }
       />
-      <Route 
-        path="/users" 
-        element={
-          user && user.role === 'admin' ? 
-          <Users /> : 
-          <Navigate to="/" replace />
-        } 
+      <Route
+        path="/citizens"
+        element={<Navigate to="/transmigrants" replace />}
       />
-      <Route 
-        path="/areas" 
+      <Route
+        path="/users"
         element={
-          user && (user.role === 'admin' || user.role === 'staff') ? 
-          <Areas /> : 
-          <Navigate to="/" replace />
-        } 
+          user && user.role === 'admin' ?
+            <Users /> :
+            <Navigate to="/" replace />
+        }
       />
-      <Route 
-        path="/distribution-map" 
+      <Route
+        path="/areas"
         element={
-          user && (user.role === 'admin' || user.role === 'staff') ? 
-          <DistributionMap /> : 
-          <Navigate to="/" replace />
-        } 
+          user && (user.role === 'admin' || user.role === 'staff') ?
+            <Areas /> :
+            <Navigate to="/" replace />
+        }
       />
-      <Route 
-        path="/reports" 
+      <Route
+        path="/upt"
         element={
-          user && (user.role === 'admin' || user.role === 'staff') ? 
-          <div>Reports Page - Coming Soon</div> : 
-          <Navigate to="/" replace />
-        } 
+          user && (user.role === 'admin' || user.role === 'staff') ?
+            <UPT /> :
+            <Navigate to="/" replace />
+        }
       />
-      <Route 
-        path="/statistics" 
+      <Route
+        path="/regencies"
         element={
-          user && (user.role === 'admin' || user.role === 'staff') ? 
-          <div>Statistics Page - Coming Soon</div> : 
-          <Navigate to="/" replace />
-        } 
+          user && (user.role === 'admin' || user.role === 'staff') ?
+            <Regencies /> :
+            <Navigate to="/" replace />
+        }
       />
-      <Route 
-        path="/settings" 
+      <Route
+        path="/locations"
         element={
-          user && user.role === 'admin' ? 
-          <div>Settings Page - Coming Soon</div> : 
-          <Navigate to="/" replace />
-        } 
+          user && (user.role === 'admin' || user.role === 'staff') ?
+            <Locations /> :
+            <Navigate to="/" replace />
+        }
+      />
+      <Route
+        path="/distribution-map"
+        element={
+          user && (user.role === 'admin' || user.role === 'staff') ?
+            <DistributionMap /> :
+            <Navigate to="/" replace />
+        }
+      />
+      <Route
+        path="/reports"
+        element={
+          user && (user.role === 'admin' || user.role === 'staff') ?
+            <div>Reports Page - Coming Soon</div> :
+            <Navigate to="/" replace />
+        }
+      />
+      <Route
+        path="/statistics"
+        element={
+          user && (user.role === 'admin' || user.role === 'staff') ?
+            <div>Statistics Page - Coming Soon</div> :
+            <Navigate to="/" replace />
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          user && user.role === 'admin' ?
+            <div>Settings Page - Coming Soon</div> :
+            <Navigate to="/" replace />
+        }
       />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
-} 
+}
 
 function App() {
   return (

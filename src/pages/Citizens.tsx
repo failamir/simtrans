@@ -84,7 +84,7 @@ export const Citizens: React.FC = () => {
   const handleAddCitizens = async (citizensData: Omit<Citizen, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>[]) => {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     const newCitizens = citizensData.map((citizenData, index) => ({
       ...citizenData,
       id: (Date.now() + index).toString(),
@@ -98,9 +98,9 @@ export const Citizens: React.FC = () => {
       upsertCitizens(merged);
       return merged;
     });
-    
+
     // Show success message
-    alert(`Berhasil menambahkan ${newCitizens.length} data penduduk`);
+    alert(`Berhasil menambahkan ${newCitizens.length} data transmigran`);
   };
 
   const handleEdit = (citizen: Citizen) => {
@@ -151,7 +151,7 @@ export const Citizens: React.FC = () => {
   };
 
   return (
-    <Layout title="Data Penduduk">
+    <Layout title="Data Transmigran">
       <div className="space-y-6">
         {/* Header Actions */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
@@ -190,7 +190,7 @@ export const Citizens: React.FC = () => {
               className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
             >
               <Plus className="w-4 h-4" />
-              <span>Tambah Keluarga</span>
+              <span>Tambah Transmigran</span>
             </button>
           </div>
         </div>
@@ -200,7 +200,7 @@ export const Citizens: React.FC = () => {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Penduduk</p>
+                <p className="text-sm text-gray-600">Total Transmigran</p>
                 <p className="text-2xl font-bold text-gray-900">{citizens.length.toLocaleString('id-ID')}</p>
               </div>
               <Users className="w-8 h-8 text-blue-500" />
@@ -334,16 +334,15 @@ export const Citizens: React.FC = () => {
                       <div className="text-sm text-gray-500">{citizen.email}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        citizen.maritalStatus === 'married' 
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${citizen.maritalStatus === 'married'
                           ? 'bg-green-100 text-green-800'
                           : citizen.maritalStatus === 'single'
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
                         {citizen.maritalStatus === 'married' ? 'Menikah' :
-                         citizen.maritalStatus === 'single' ? 'Belum Menikah' : 
-                         citizen.maritalStatus}
+                          citizen.maritalStatus === 'single' ? 'Belum Menikah' :
+                            citizen.maritalStatus}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

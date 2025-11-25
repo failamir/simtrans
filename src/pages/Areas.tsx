@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { Layout } from '../components/Layout/Layout';
 import { AreaForm } from '../components/Areas/AreaForm';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  Edit, 
-  Trash2, 
-  Eye, 
-  MapPin, 
+import {
+  Plus,
+  Search,
+  Filter,
+  Edit,
+  Trash2,
+  Eye,
+  MapPin,
   ChevronRight,
   ChevronDown,
   Map as MapIcon,
@@ -157,7 +157,7 @@ export const Areas: React.FC = () => {
 
   const filteredAreas = areas.filter(area => {
     const matchesSearch = area.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         area.code.includes(searchTerm);
+      area.code.includes(searchTerm);
     const matchesType = selectedType === 'all' || area.type === selectedType;
     return matchesSearch && matchesType;
   });
@@ -166,7 +166,7 @@ export const Areas: React.FC = () => {
 
   const handleAddArea = async (areaData: Omit<Area, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>) => {
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     const newArea: Area = {
       ...areaData,
       id: Date.now().toString(),
@@ -187,7 +187,7 @@ export const Areas: React.FC = () => {
   const handleDelete = (areaId: string) => {
     const area = areas.find(a => a.id === areaId);
     const hasChildren = areas.some(a => a.parentId === areaId);
-    
+
     if (hasChildren) {
       alert('Tidak dapat menghapus kawasan yang memiliki sub-kawasan');
       return;
@@ -236,7 +236,7 @@ export const Areas: React.FC = () => {
 
     return (
       <div key={node.id} className="border-l-2 border-gray-200">
-        <div 
+        <div
           className="flex items-center justify-between p-3 hover:bg-gray-50 border-b border-gray-100"
           style={{ paddingLeft: `${depth * 24 + 12}px` }}
         >
@@ -254,16 +254,15 @@ export const Areas: React.FC = () => {
               </button>
             )}
             {!hasChildren && <div className="w-6" />}
-            
+
             <Icon className="w-5 h-5 text-gray-500" />
-            
+
             <div className="flex-1">
               <div className="flex items-center space-x-2">
                 <span className="font-medium text-gray-900">{node.name}</span>
                 <span className="text-sm text-gray-500">({node.code})</span>
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                  node.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}>
+                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${node.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}>
                   {node.isActive ? 'Aktif' : 'Tidak Aktif'}
                 </span>
               </div>
@@ -340,7 +339,7 @@ export const Areas: React.FC = () => {
             {filteredAreas.map((area) => {
               const Icon = getTypeIcon(area.type);
               const parent = areas.find(a => a.id === area.parentId);
-              
+
               return (
                 <tr key={area.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -371,9 +370,8 @@ export const Areas: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      area.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${area.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
                       {area.isActive ? 'Aktif' : 'Tidak Aktif'}
                     </span>
                   </td>
@@ -409,7 +407,7 @@ export const Areas: React.FC = () => {
   );
 
   return (
-    <Layout title="Manajemen Kawasan">
+    <Layout title="Data Master - Kawasan">
       <div className="space-y-6">
         {/* Header Actions */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0">
@@ -424,7 +422,7 @@ export const Areas: React.FC = () => {
                 className="pl-10 pr-4 py-2 w-80 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
               />
             </div>
-            
+
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
@@ -440,26 +438,24 @@ export const Areas: React.FC = () => {
             <div className="flex bg-gray-100 rounded-lg p-1">
               <button
                 onClick={() => setViewMode('hierarchy')}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  viewMode === 'hierarchy' 
-                    ? 'bg-white text-gray-900 shadow-sm' 
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${viewMode === 'hierarchy'
+                    ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-500 hover:text-gray-700'
-                }`}
+                  }`}
               >
                 Hierarki
               </button>
               <button
                 onClick={() => setViewMode('table')}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  viewMode === 'table' 
-                    ? 'bg-white text-gray-900 shadow-sm' 
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${viewMode === 'table'
+                    ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-500 hover:text-gray-700'
-                }`}
+                  }`}
               >
                 Tabel
               </button>
             </div>
-            
+
             <button
               onClick={() => {
                 setEditingArea(undefined);
@@ -484,7 +480,7 @@ export const Areas: React.FC = () => {
               <MapIcon className="w-8 h-8 text-green-500" />
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -496,7 +492,7 @@ export const Areas: React.FC = () => {
               <Building className="w-8 h-8 text-blue-500" />
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -508,7 +504,7 @@ export const Areas: React.FC = () => {
               <Building className="w-8 h-8 text-purple-500" />
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <div className="flex items-center justify-between">
               <div>
